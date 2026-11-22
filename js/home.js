@@ -1,4 +1,4 @@
-/* Inicio: categorías, Black Friday, la diferencia (bento 3D), destacados, stacks, comunidad */
+/* Inicio: carrusel, beneficios, más vendidos (pestañas), Black Friday, categorías, stacks, comunidad */
 (function () {
   "use strict";
   const X = window.BFX, B = X.B, $ = X.$, esc = X.esc, money = X.money, P = X.P;
@@ -108,22 +108,38 @@
     X.countdown($("#countdown"));
   }
 
-  // La diferencia (bento 3D)
+  // Beneficios (franja de confianza)
   const I = X.ICON, bf = B.campaignActive();
-  const cards = [
-    ["a", "nosotros.html", "", '<div class="feat__big">100<b>%</b></div><h3>Originales, siempre.</h3><p>Representantes oficiales de Dragon Pharma y ProSupps, con registro SENASAG y sello de autenticidad.</p><img class="feat__img" src="' + P("dp-whey-phorm").img + '" width="720" height="720" alt="" loading="lazy">'],
-    ["b", "pedido.html", I.truck, "<h3>Envío gratis a domicilio.</h3><p>Y envíos a nivel nacional, a cualquier ciudad de Bolivia.</p>"],
-    ["c", bf ? "ofertas.html" : "tienda.html", I.gift, bf ? '<h3>1 accesorio gratis.</h3><p>Shaker, mochila o gorra por cualquier compra.</p><img class="feat__img" src="assets/img/bf-accesorios.webp" width="900" height="1125" alt="" loading="lazy">' : "<h3>Promos todo el año.</h3><p>Seguí la tienda para no perderte ninguna.</p>"],
-    ["d", "sucursales.html", I.store, "<h3>7 ciudades.</h3><p>Retirá en tu sucursal o mirá todo el stock en persona.</p>"],
-    ["e", "pedido.html", I.chat, "<h3>Pedido en minutos.</h3><p>Armamos tu mensaje de WhatsApp con todo el detalle.</p>"],
-    ["f", "#leonia-coach", I.spark, "<h3>Coach con IA, gratis.</h3><p>LeonIA te arma rutina, proteína y suplementos, por texto o por voz.</p>"],
+  const TRUST = [
+    [I.shield, "100% originales", "Registro SENASAG", "nosotros.html"],
+    [I.truck, "Envío gratis", "A domicilio · toda Bolivia", "pedido.html"],
+    [bf ? I.gift : I.spark, bf ? "1 accesorio gratis" : "Promos todo el año", bf ? "Por cualquier compra" : "Seguí la tienda", bf ? "ofertas.html" : "tienda.html"],
+    [I.store, "7 ciudades", "Retirá en tu sucursal", "sucursales.html"],
   ];
-  $("#bento").innerHTML = cards.map(([k, h, ic, html]) => '<a class="feat feat--' + k + '" data-tilt href="' + h + '"' + (k === "f" ? " data-open-chat" : "") + ">" + (ic ? '<span class="feat__ic">' + ic + "</span>" : "") + html + "</a>").join("");
-  X.tilt($("#bento"));
+  $("#trust").innerHTML = TRUST.map(([ic, t, d, h]) => '<a class="trust__it" href="' + h + '">' + ic + "<span><b>" + t + "</b><small>" + d + "</small></span></a>").join("");
 
-  // Destacados: estrellas + mayores descuentos
-  const top = Object.values(CAT).sort((a, b) => (b.star - a.star) || (b.off - a.off)).slice(0, 8);
-  $("#topGrid").innerHTML = top.map(X.productCard).join("");
+  // Más vendidos con pestañas (como una tienda deportiva clásica)
+  const all = Object.values(CAT);
+  const TABS = [
+    ["top", "Destacados", (p) => true],
+    ["proteinas", "Proteínas", (p) => p.cat === "proteinas"],
+    ["creatinas", "Creatinas", (p) => p.cat === "creatinas"],
+    ["preentrenos", "Pre-entrenos", (p) => p.cat === "preentrenos"],
+  ].filter((t) => all.some(t[2]));
+  const tabs = $("#topTabs"), grid = $("#topGrid");
+  tabs.innerHTML = TABS.map(([k, t], i) => '<button type="button" role="tab" data-tab="' + k + '" aria-selected="' + (i === 0) + '">' + t + "</button>").join("");
+  function showTab(k) {
+    const t = TABS.find((x) => x[0] === k) || TABS[0];
+    grid.innerHTML = all.filter(t[2]).sort((a, b) => (b.star - a.star) || (b.off - a.off)).slice(0, 8).map(X.productCard).join("");
+    tabs.querySelectorAll("[data-tab]").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === t[0])));
+  }
+  tabs.addEventListener("click", (e) => { const b = e.target.closest("[data-tab]"); if (b) showTab(b.dataset.tab); });
+  tabs.addEventListener("keydown", (e) => {
+    if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+    const bs = [...tabs.children], i = bs.indexOf(document.activeElement); if (i < 0) return;
+    const n = bs[(i + (e.key === "ArrowRight" ? 1 : -1) + bs.length) % bs.length]; n.focus(); showTab(n.dataset.tab);
+  });
+  showTab("top");
 
   // Stacks (precio = suma exacta de los productos, sin descuentos inventados)
   const STACKS = [
@@ -139,7 +155,7 @@
   $("#stacks").addEventListener("click", (e) => {
     const b = e.target.closest("[data-stack]"); if (!b) return;
     STACKS[+b.dataset.stack][2].forEach((id) => X.cart.add(id, 1, true));
-    X.toast("Stack <b>" + esc(STACKS[+b.dataset.stack][0]) + "</b> agregado a tu bolsa"); X.openCart();
+    X.toast("Stack <b>" + esc(STACKS[+b.dataset.stack][0]) + "</b> agregado al carrito"); X.openCart();
   });
 
   // Comunidad (solo 5 reels; el resto vive en Nosotros)

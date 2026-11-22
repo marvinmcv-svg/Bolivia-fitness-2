@@ -4,7 +4,7 @@
   const X = window.BFX, B = X.B, $ = X.$, esc = X.esc, money = X.money, P = X.P;
   const F = Object.assign({ step: 1, mode: "", branch: "", name: "", address: "", reference: "", when: "asap", time: "", note: "", topic: "", question: "" }, X.store.get("bf_funnel", {}, true));
   if (X.cart.count() && F.step === 1 && !F.mode) F.step = 1;
-  const STEPS = ["Tu bolsa", "Entrega", "Tus datos", "Enviar"];
+  const STEPS = ["Tu carrito", "Entrega", "Tus datos", "Enviar"];
   const fmsg = (t) => { $("#fmsg").textContent = t || ""; };
   const order = () => ({ lines: X.cart.lines(), mode: F.mode || "delivery", branch: F.branch, address: F.address, reference: F.reference, when: F.when === "later" && F.time ? F.time : "asap", name: F.name, gift: X.cart.getGift(), note: F.note, topic: F.topic, question: F.question });
   function preview() {
@@ -19,7 +19,7 @@
     const f = $("#fform"), lines = X.cart.lines();
     if (F.step === 1) {
       const sugg = X.complements(lines.map((l) => l.id)).slice(0, 3);
-      f.innerHTML = "<h2>Tu bolsa</h2>" + (lines.length ? lines.map((l) => { const p = P(l.id); return '<div class="bag__row"><a href="' + X.url.product(p.id) + '"><img src="' + esc(p.img) + '" width="72" height="72" alt=""></a><div><b>' + esc(p.short) + "</b><small>" + esc(p.size) + " · " + money(p.price) + (p.before ? " · antes " + money(p.before) : "") + "</small></div>" + X.qtyHTML(p, l.qty) + "</div>"; }).join("") + '<div class="bag__tot"><span>Total</span><span>' + money(X.cart.total()) + "</span></div>" : '<p class="muted">Tu bolsa está vacía.</p><a class="btn" href="tienda.html">Ir a la tienda <span class="arrow">→</span></a>') +
+      f.innerHTML = "<h2>Tu carrito</h2>" + (lines.length ? lines.map((l) => { const p = P(l.id); return '<div class="bag__row"><a href="' + X.url.product(p.id) + '"><img src="' + esc(p.img) + '" width="72" height="72" alt=""></a><div><b>' + esc(p.short) + "</b><small>" + esc(p.size) + " · " + money(p.price) + (p.before ? " · antes " + money(p.before) : "") + "</small></div>" + X.qtyHTML(p, l.qty) + "</div>"; }).join("") + '<div class="bag__tot"><span>Total</span><span>' + money(X.cart.total()) + "</span></div>" : '<p class="muted">Tu carrito está vacío.</p><a class="btn" href="tienda.html">Ir a la tienda <span class="arrow">→</span></a>') +
         (sugg.length ? '<p style="margin:22px 0 4px;font-weight:600">Combinalo con</p><div class="picker">' + sugg.map((p) => '<button type="button" data-add="' + p.id + '"><img src="' + esc(p.img) + '" width="40" height="40" alt=""><span>' + esc(p.short) + "<br><b>+ " + money(p.price) + "</b></span></button>").join("") + "</div>" : "") +
         (B.campaignActive() && lines.length ? '<div class="field"><label for="f-gift">🎁 Accesorio de regalo (1 por compra)</label><select id="f-gift" data-gift-sel><option value="">El que esté disponible</option>' + B.campaign.gifts.map((g) => "<option" + (g === X.cart.getGift() ? " selected" : "") + ">" + esc(g) + "</option>").join("") + "</select></div>" : "") +
         nav(0, lines.length ? 2 : 0) + (lines.length ? "" : '<p style="margin-top:18px"><button class="link" type="button" data-mode-q>¿Solo querés hacer una consulta?</button></p>');

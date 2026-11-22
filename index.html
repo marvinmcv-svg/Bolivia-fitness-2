@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Bolivia Fitness · Tienda online de suplementos americanos originales</title>
   <meta name="description" content="Tienda online oficial de Bolivia Fitness: Dragon Pharma y ProSupps originales con registro SENASAG. Creatinas, proteínas y pre-entrenos. Black Friday hasta 40% OFF + accesorio gratis. Envíos a toda Bolivia.">
-  <meta name="theme-color" content="#080606">
+  <meta name="theme-color" content="#000000">
   <link rel="canonical" href="https://bolivia-fitness.vercel.app/">
   <link rel="icon" href="favicon.ico" sizes="48x48">
   <link rel="icon" type="image/png" sizes="32x32" href="assets/brand/favicon-32.png">
@@ -20,8 +20,9 @@
   <meta name="twitter:card" content="summary">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Kanit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/retail.css">
   <link rel="preload" as="image" href="assets/img/logo.png">
   <link rel="preload" as="image" href="assets/hero/bf/dp-creatine-200.webp" fetchpriority="high">
   <script type="application/ld+json">
@@ -47,21 +48,24 @@
     <section class="hcar" id="hero" aria-roledescription="carrusel" aria-label="Destacados de Bolivia Fitness">
       <h1 class="vh">Bolivia Fitness · Tienda online de suplementos americanos originales Dragon Pharma y ProSupps</h1>
       <div class="hcar__track" id="hcarTrack"></div>
+      <button class="iconbtn hcar__arw hcar__arw--prev" id="hcarPrev" aria-label="Diapositiva anterior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <button class="iconbtn hcar__arw hcar__arw--next" id="hcarNext" aria-label="Diapositiva siguiente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
       <div class="hcar__ui">
         <div class="hcar__bars" id="hcarBars" role="tablist" aria-label="Elegir diapositiva"></div>
-        <div class="hcar__ctrl">
-          <button class="iconbtn" id="hcarPrev" aria-label="Diapositiva anterior"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
-          <button class="iconbtn" id="hcarPlay" aria-label="Pausar carrusel"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="i-pause" d="M9 6v12M15 6v12"/><path class="i-play" d="M8 5.5v13l11-6.5z"/></svg></button>
-          <button class="iconbtn" id="hcarNext" aria-label="Diapositiva siguiente"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
-        </div>
+        <button class="iconbtn hcar__play" id="hcarPlay" aria-label="Pausar carrusel"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="i-pause" d="M9 6v12M15 6v12"/><path class="i-play" d="M8 5.5v13l11-6.5z"/></svg></button>
       </div>
     </section>
 
-    <!-- Categorías -->
-    <section class="sec" aria-labelledby="catsTtl">
+    <!-- Beneficios -->
+    <section class="trust" aria-label="Por qué comprar en Bolivia Fitness"><div class="wrap trust__in" id="trust"></div></section>
+
+    <!-- Más vendidos -->
+    <section class="sec sec--tight" aria-labelledby="topTtl">
       <div class="wrap">
-        <div class="sechead reveal"><div><p class="eyebrow">Tienda online</p><h2 class="h2" id="catsTtl">Comprá por objetivo. <span class="muted">Todo original, todo online.</span></h2></div><a class="more" href="tienda.html">Ver toda la tienda <span class="arrow">→</span></a></div>
-        <div class="cats reveal" id="cats"></div>
+        <h2 class="h2c" id="topTtl">Más vendidos</h2>
+        <div class="tabs" id="topTabs" role="tablist" aria-label="Filtrar más vendidos"></div>
+        <div class="pgrid" id="topGrid" role="tabpanel" aria-labelledby="topTtl"></div>
+        <div class="center"><a class="btn btn--outline btn--lg" href="tienda.html">Ver toda la tienda</a></div>
       </div>
     </section>
 
@@ -69,37 +73,29 @@
     <section class="sec bf" id="blackfriday" aria-labelledby="bfTtl" hidden>
       <div class="wrap">
         <div class="bf__grid reveal">
-          <div><p class="eyebrow">Black Friday · 16 al 30 de noviembre</p><h2 class="bf__big" id="bfTtl">Hasta <b>40%</b><br>OFF</h2></div>
+          <div><p class="eyebrow">Black Friday · 16 al 30 de noviembre</p><h2 class="bf__big" id="bfTtl">Hasta <b>40%</b> OFF</h2></div>
           <div><p class="lede" style="margin:0 0 18px">En todos nuestros productos americanos, y 1 accesorio gratis por cualquier compra. Termina en:</p><div class="countdown" id="countdown"></div></div>
         </div>
       </div>
       <div class="rail" id="bfRail"></div>
       <div class="wrap" style="display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:center">
-        <a class="btn btn--gold" href="ofertas.html">Ver todas las ofertas <span class="arrow">→</span></a>
+        <a class="btn btn--light" href="ofertas.html">Ver todas las ofertas <span class="arrow">→</span></a>
         <div class="railnav"><button class="iconbtn" data-rail="bfRail" data-dir="-1" aria-label="Anterior">‹</button><button class="iconbtn" data-rail="bfRail" data-dir="1" aria-label="Siguiente">›</button></div>
       </div>
     </section>
 
-    <!-- La diferencia -->
-    <section class="sec sec--glow" aria-labelledby="diffTtl">
+    <!-- Categorías -->
+    <section class="sec sec--tight" aria-labelledby="catsTtl">
       <div class="wrap">
-        <div class="sechead reveal"><div><p class="eyebrow">Por qué comprar acá</p><h2 class="h2" id="diffTtl">La diferencia <span class="red">Bolivia Fitness.</span></h2></div></div>
-        <div class="bento" id="bento"></div>
-      </div>
-    </section>
-
-    <!-- Más vendidos -->
-    <section class="sec" aria-labelledby="topTtl">
-      <div class="wrap">
-        <div class="sechead reveal"><div><p class="eyebrow">Destacados</p><h2 class="h2" id="topTtl">Lo más buscado. <span class="muted">Directo a tu bolsa.</span></h2></div><a class="more" href="tienda.html">Ver los 13 productos <span class="arrow">→</span></a></div>
-        <div class="pgrid" id="topGrid"></div>
+        <h2 class="h2c" id="catsTtl">Comprá por categoría</h2>
+        <div class="cats reveal" id="cats"></div>
       </div>
     </section>
 
     <!-- Armá tu stack -->
-    <section class="sec sec--glow" aria-labelledby="stackTtl">
+    <section class="sec sec--tight sec--alt" aria-labelledby="stackTtl">
       <div class="wrap">
-        <div class="sechead reveal"><div><p class="eyebrow">Armá tu stack</p><h2 class="h2" id="stackTtl">Combinaciones listas. <span class="muted">Un clic y a tu bolsa.</span></h2></div></div>
+        <h2 class="h2c" id="stackTtl">Armá tu stack</h2><p class="subc">Combinaciones listas. Un clic y al carrito.</p>
         <div class="stacks" id="stacks"></div>
       </div>
     </section>
@@ -132,7 +128,7 @@
 
     <!-- Comunidad (breve) -->
     <section class="sec" aria-labelledby="comTtl" style="padding-top:20px">
-      <div class="wrap"><div class="sechead reveal"><div><p class="eyebrow">Comunidad</p><h2 class="h2" id="comTtl">Una sola manada. <span class="muted">Mirá lo que pasa en las tiendas.</span></h2></div><a class="more" href="nosotros.html#comunidad">Ver comunidad <span class="arrow">→</span></a></div></div>
+      <div class="wrap"><h2 class="h2c" id="comTtl">Una sola manada</h2><p class="subc">Mirá lo que pasa en las tiendas · <a href="nosotros.html#comunidad">Ver comunidad</a></p></div>
       <div class="rail reels" id="reelRail"></div>
     </section>
   </main>

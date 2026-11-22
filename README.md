@@ -4,9 +4,11 @@ Tienda online de **Bolivia Fitness** (representantes oficiales de Dragon Pharma 
 **LeonIA** 🦁, una asistente de compras con IA que arma el carrito en vivo, por texto o por voz, y deja el
 pedido listo para enviar por WhatsApp.
 
-- Diseño: lenguaje visual de tienda online premium tomado de referencias de Mobbin (tienda web de Apple):
-  lienzo gris claro, tarjetas blancas, títulos "**Negrita.** gris", estantes horizontales y página de compra
-  con opciones en mosaico. Marca, fotos, precios y textos son 100% de @boliviafitness.
+- Diseño: tema claro de "retail deportivo" tomado como referencia del sitio de Dragon Pharma (marca que
+  representamos): barra superior negra con anuncios rotativos, header blanco con navegación en mayúsculas,
+  buscador y carrito cuadrado negro, banners a todo el ancho, "Más vendidos" con pestañas, tarjetas con precio
+  rojo + tachado + "% OFF" y botón "Agregar al carrito", footer negro. Kanit, esquinas rectas, rojo #D70000
+  (`css/retail.css`, se carga después de `css/styles.css`). Marca, fotos, precios y textos son 100% de @boliviafitness.
 - Todo dato (precio, producto, sucursal, horario, promo) sale de publicaciones de @boliviafitness y lleva la
   URL del post en un comentario en `js/data.js`.
 - Fotos y videos: descargados de los posts y reels de la marca y procesados a WebP / MP4 en `assets/`.
@@ -15,7 +17,8 @@ pedido listo para enviar por WhatsApp.
 
 ```
 index.html          estructura + SEO (Open Graph, schema.org Store)
-css/styles.css      sistema de diseño (tokens de marca arriba, con notas de muestreo)
+css/styles.css      sistema de diseño base (componentes, layout, responsive)
+css/retail.css      tema claro actual (tokens + estilo retail; las secciones oscuras redeclaran tokens)
 js/data.js          TODO el contenido + catalog() — lo comparten el sitio y las herramientas de LeonIA
 js/app.js           tienda, bolsa, checkout por WhatsApp, sucursales en vivo, UI de LeonIA + voz
 api/leonia.js       endpoint del asistente: bucle de herramientas, responde NDJSON en streaming

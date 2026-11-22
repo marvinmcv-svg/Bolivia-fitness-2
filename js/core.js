@@ -19,6 +19,7 @@
     set(k, v, s) { try { (s ? sessionStorage : localStorage).setItem(k, JSON.stringify(v)); } catch (e) { /* modo privado */ } },
   };
   const ICON = {
+    cart: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 4h2.6l2.3 11h10.3l2-8H6.3"/><circle cx="9.5" cy="19.3" r="1.4"/><circle cx="16.5" cy="19.3" r="1.4"/></svg>',
     bag: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 8.5h13l-1 11.5h-11z"/><path d="M9 8.5V7a3 3 0 0 1 6 0v1.5"/></svg>',
     search: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg>',
     plus: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
@@ -47,35 +48,62 @@
   }
 
   /* ---------------- layout compartido ---------------- */
-  const NAV = [["index.html", "Inicio", "home"], ["tienda.html", "Tienda", "shop"], ["ofertas.html", "Ofertas", "offers"], ["sucursales.html", "Sucursales", "stores"], ["nosotros.html", "Nosotros", "about"]];
+  const NAV = [["tienda.html", "Tienda", "shop"], ["tienda.html?cat=proteinas", "Proteínas", "proteinas"], ["tienda.html?cat=creatinas", "Creatinas", "creatinas"], ["tienda.html?cat=preentrenos", "Pre-entrenos", "preentrenos"], ["ofertas.html", "Ofertas", "offers"], ["sucursales.html", "Sucursales", "stores"]];
+  const NAV_KEY = (() => { const c = new URLSearchParams(location.search).get("cat"); return PAGE === "shop" && c ? c : PAGE; })();
+  const SOCIAL = {
+    ig: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.3" cy="6.7" r=".6" fill="currentColor"/></svg>',
+    fb: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 8.5V7c0-.8.5-1.3 1.3-1.3H17V2.5h-2.6C11.8 2.5 10.5 4 10.5 6.6v1.9H8V12h2.5v9.5H14V12h2.7l.5-3.5z" fill="currentColor" stroke="none"/></svg>',
+    tt: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3v11.5a3.5 3.5 0 1 1-3-3.46M14 3c.4 2.6 2.2 4.3 5 4.5" /></svg>',
+    user: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.2-4 4.3-6 8-6s6.8 2 8 6"/></svg>',
+  };
+  function topMessages() {
+    const m = [];
+    if (B.campaignActive()) m.push('Black Friday: hasta ' + B.campaign.upTo + '% OFF + 1 accesorio gratis · <a href="ofertas.html">Comprar ofertas</a>');
+    m.push('Envío gratis a domicilio · envíos a toda Bolivia');
+    m.push('Originales con registro SENASAG · Dragon Pharma y ProSupps');
+    m.push('¿Dudas? LeonIA te responde 24/7 · <a href="#" data-open-chat>Preguntar</a>');
+    return m;
+  }
   function injectLayout() {
     const head = document.createElement("div");
+    const msgs = topMessages();
     head.innerHTML =
       '<a class="skip" href="#main">Saltar al contenido</a>' +
+      '<div class="topbar"><div class="topbar__in">' +
+      '<div class="topbar__social"><a href="' + B.config.facebook + '" target="_blank" rel="noopener" aria-label="Facebook">' + SOCIAL.fb + '</a><a href="' + B.config.instagram + '" target="_blank" rel="noopener" aria-label="Instagram">' + SOCIAL.ig + '</a><a href="' + B.config.tiktok + '" target="_blank" rel="noopener" aria-label="TikTok">' + SOCIAL.tt + "</a></div>" +
+      '<div class="topbar__msg" aria-roledescription="anuncios"><button type="button" class="topbar__arw" data-tmsg="-1" aria-label="Anuncio anterior">‹</button><p id="tmsg" aria-live="polite">' + msgs[0] + '</p><button type="button" class="topbar__arw" data-tmsg="1" aria-label="Anuncio siguiente">›</button></div>' +
+      '<div class="topbar__links"><a href="nosotros.html">Nosotros</a><a href="pedido.html">' + SOCIAL.user + "<span>Mi pedido</span></a></div></div></div>" +
       '<header class="gnav"><nav class="gnav__in" aria-label="Principal">' +
-      '<a class="gnav__logo" href="index.html" aria-label="Bolivia Fitness, inicio"><img src="assets/img/logo.png" width="34" height="34" alt=""><span>Bolivia <b>Fitness</b></span></a>' +
-      '<ul class="gnav__links">' + NAV.map(([h, t, k]) => '<li><a href="' + h + '"' + (k === PAGE ? ' aria-current="page"' : "") + ">" + t + "</a></li>").join("") + '<li><a href="#" class="ai" data-open-chat>LeonIA</a></li></ul>' +
-      '<div class="gnav__icons"><a class="iconbtn" href="tienda.html#buscar" aria-label="Buscar productos">' + ICON.search + '</a><button class="iconbtn cartbtn" data-open-cart aria-label="Abrir bolsa">' + ICON.bag + '<span class="cartbtn__count" data-cart-count hidden>0</span></button>' +
-      '<button class="iconbtn gnav__burger" id="burger" aria-expanded="false" aria-controls="navpanel" aria-label="Menú"><span class="burger-ic" aria-hidden="true"><i></i><i></i></span></button></div></nav></header>' +
-      '<div class="navpanel" id="navpanel" hidden><nav aria-label="Menú móvil">' + NAV.map(([h, t]) => '<a href="' + h + '">' + t + "</a>").join("") + '<a href="pedido.html">Mi bolsa</a><a href="#" class="ai" data-open-chat>LeonIA</a></nav></div>' +
-      (B.campaignActive() ? '<div class="ribbon"><b>Black Friday:</b> hasta ' + B.campaign.upTo + '% OFF + 1 accesorio gratis por cualquier compra, hasta el 30 de noviembre. <a href="ofertas.html">Comprar ofertas →</a></div>' : "");
+      '<button class="iconbtn gnav__burger" id="burger" aria-expanded="false" aria-controls="navpanel" aria-label="Menú"><span class="burger-ic" aria-hidden="true"><i></i><i></i><i></i></span></button>' +
+      '<a class="gnav__logo" href="index.html" aria-label="Bolivia Fitness, inicio"><img src="assets/img/logo.png" width="44" height="44" alt=""><span>Bolivia<b>Fitness</b></span></a>' +
+      '<ul class="gnav__links">' + NAV.map(([h, t, k]) => '<li><a href="' + h + '"' + (k === NAV_KEY ? ' aria-current="page"' : "") + ">" + t + "</a></li>").join("") + '<li><a href="#" class="ai" data-open-chat>LeonIA</a></li></ul>' +
+      '<form class="gsearch" action="tienda.html" role="search"><label class="vh" for="gq">Buscar productos</label>' + ICON.search + '<input id="gq" name="q" type="search" placeholder="Buscar…" autocomplete="off"></form>' +
+      '<div class="gnav__icons"><a class="iconbtn gnav__find" href="tienda.html#buscar" aria-label="Buscar productos">' + ICON.search + '</a><button class="cartbtn" data-open-cart aria-label="Abrir carrito">' + ICON.cart + '<span class="cartbtn__count" data-cart-count hidden>0</span></button></div></nav></header>' +
+      '<div class="navpanel" id="navpanel" hidden><nav aria-label="Menú móvil">' + NAV.map(([h, t]) => '<a href="' + h + '">' + t + "</a>").join("") + '<a href="nosotros.html">Nosotros</a><a href="pedido.html">Mi pedido</a><a href="#" class="ai" data-open-chat>LeonIA</a></nav></div>';
     document.body.prepend(...head.childNodes);
     // alto real de la cinta de campaña → el hero 3D descuenta ese espacio y sus botones no quedan bajo el pliegue
-    const rib = $(".ribbon");
+    const rib = $(".topbar");
+    // anuncios rotativos de la barra superior
+    let ti = 0; const tm = $("#tmsg");
+    const showMsg = (d) => { ti = (ti + d + msgs.length) % msgs.length; tm.classList.remove("in"); void tm.offsetWidth; tm.innerHTML = msgs[ti]; tm.classList.add("in"); };
+    $$("[data-tmsg]").forEach((b) => b.addEventListener("click", () => { showMsg(+b.dataset.tmsg); clearInterval(tT); }));
+    const tT = reduced ? 0 : setInterval(() => { if (!document.hidden) showMsg(1); }, 5000);
     const setRibbon = () => document.documentElement.style.setProperty("--ribbon", (rib ? rib.offsetHeight : 0) + "px");
     setRibbon(); addEventListener("resize", setRibbon, { passive: true });
 
     const foot = document.createElement("div");
     const cats = B.categories.filter((c) => Object.values(CAT).some((p) => p.cat === c.id));
     foot.innerHTML =
+      '<section class="ftr__news"><div class="wrap"><div><h2>Sumate a la manada</h2><p>Promos, lanzamientos y sorteos antes que nadie, directo a tu WhatsApp.</p></div><a class="btn btn--wa" href="' + B.waLink(B.config.callCenter, "¡Hola Bolivia Fitness! 🦁 Quiero recibir promos y lanzamientos.") + '" target="_blank" rel="noopener">Quiero las promos</a></div></section>' +
       '<footer class="ftr" id="footer"><div class="wrap"><div class="ftr__top">' +
-      '<div class="ftr__brand"><a class="gnav__logo" href="index.html"><img src="assets/img/logo.png" width="34" height="34" alt=""><span>Bolivia <b>Fitness</b></span></a><p>Representantes oficiales de Dragon Pharma y ProSupps en Bolivia. Suplementos americanos originales con registro SENASAG.</p><a class="btn btn--sm" href="tienda.html">Ir a la tienda <span class="arrow">→</span></a></div>' +
+      '<div class="ftr__brand"><a class="gnav__logo" href="index.html"><img src="assets/img/logo.png" width="44" height="44" alt=""><span>Bolivia<b>Fitness</b></span></a><p>Representantes oficiales de Dragon Pharma y ProSupps en Bolivia. Suplementos americanos originales con registro SENASAG.</p>' +
+      '<div class="ftr__social"><a href="' + B.config.facebook + '" target="_blank" rel="noopener" aria-label="Facebook">' + SOCIAL.fb + '</a><a href="' + B.config.instagram + '" target="_blank" rel="noopener" aria-label="Instagram">' + SOCIAL.ig + '</a><a href="' + B.config.tiktok + '" target="_blank" rel="noopener" aria-label="TikTok">' + SOCIAL.tt + "</a></div></div>" +
       "<div><h3>Tienda</h3><ul>" + cats.map((c) => '<li><a href="' + url.shop("cat=" + c.id) + '">' + esc(c.name) + "</a></li>").join("") + "</ul></div>" +
-      '<div><h3>Comprar</h3><ul><li><a href="ofertas.html">Ofertas</a></li><li><a href="pedido.html">Mi bolsa</a></li><li><a href="#" data-open-chat>Comprar con LeonIA</a></li><li><a href="' + B.waLink(B.config.callCenter, "¡Hola Bolivia Fitness! 🦁") + '" target="_blank" rel="noopener">WhatsApp 756 66702</a></li></ul></div>' +
+      '<div><h3>Comprar</h3><ul><li><a href="ofertas.html">Ofertas</a></li><li><a href="pedido.html">Mi pedido</a></li><li><a href="#" data-open-chat>Comprar con LeonIA</a></li><li><a href="' + B.waLink(B.config.callCenter, "¡Hola Bolivia Fitness! 🦁") + '" target="_blank" rel="noopener">WhatsApp 756 66702</a></li></ul></div>' +
       '<div><h3>Sucursales</h3><ul>' + B.branches.map((b) => '<li><a href="sucursales.html">' + esc(b.name) + "</a></li>").join("") + "</ul></div>" +
       '<div><h3>Bolivia Fitness</h3><ul><li><a href="nosotros.html">Nosotros</a></li><li><a href="nosotros.html#comunidad">Comunidad</a></li><li><a href="' + B.config.instagram + '" target="_blank" rel="noopener">Instagram</a></li><li><a href="' + B.config.facebook + '" target="_blank" rel="noopener">Facebook</a></li><li><a href="' + B.config.tiktok + '" target="_blank" rel="noopener">TikTok</a></li></ul></div></div>' +
       '<div class="ftr__bottom"><span>© ' + new Date().getFullYear() + " Bolivia Fitness · " + (B.campaignActive() ? "Precios Black Friday válidos del 16 al 30 de noviembre de 2026. " : "") + 'Stock, pago y envío se confirman por WhatsApp.</span><span>Fotos y videos: @boliviafitness</span></div></div></footer>' +
-      '<div class="drawer" id="cart" role="dialog" aria-modal="true" aria-labelledby="cartTtl" hidden><div class="scrim" data-close-cart></div><aside class="drawer__panel"><div class="drawer__head"><h2 id="cartTtl">Tu bolsa</h2><button class="xbtn" data-close-cart aria-label="Cerrar bolsa">✕</button></div><div class="drawer__body" id="cartBody"></div><div class="drawer__foot" id="cartFoot"></div></aside></div>' +
+      '<div class="drawer" id="cart" role="dialog" aria-modal="true" aria-labelledby="cartTtl" hidden><div class="scrim" data-close-cart></div><aside class="drawer__panel"><div class="drawer__head"><h2 id="cartTtl">Tu carrito</h2><button class="xbtn" data-close-cart aria-label="Cerrar carrito">✕</button></div><div class="drawer__body" id="cartBody"></div><div class="drawer__foot" id="cartFoot"></div></aside></div>' +
       '<button class="chatfab" id="chatfab" data-open-chat aria-label="Abrir LeonIA, tu coach y asistente"><img src="assets/img/logo.png" width="34" height="34" alt=""><span><b>LeonIA Coach</b><small>Armemos tu plan</small></span></button>' +
       '<div class="chat" id="chat" role="dialog" aria-modal="false" aria-labelledby="chatTtl" hidden><div class="chat__head"><div class="chat__avatar" id="chatAvatar" aria-hidden="true"><img src="assets/img/logo.png" width="52" height="52" alt=""></div><div><b id="chatTtl">LeonIA</b><small><i class="dot dot--live"></i> <span id="chatSub">Coach y recepción · 24/7</span></small></div><button class="xbtn" id="chatClose" aria-label="Cerrar asistente">✕</button></div>' +
       '<div class="chat__log" id="chatLog" aria-live="polite"></div><div class="chat__chips" id="chatChips"></div>' +
@@ -112,19 +140,20 @@
     const p = P(id); if (!p) return;
     const n = Object.assign({}, cart); n[id] = (n[id] || 0) + (qty || 1);
     setCart(n, { bump: true });
-    if (!silent) toast("Agregado a tu bolsa: <b>" + esc(p.short) + "</b> · " + money(p.price));
+    if (!silent) toast("Agregado al carrito: <b>" + esc(p.short) + "</b> · " + money(p.price));
   }
   function changeQty(id, d) { const n = Object.assign({}, cart); n[id] = (n[id] || 0) + d; if (n[id] <= 0) delete n[id]; setCart(n); }
   const getGift = () => store.get("bf_gift", "");
   const setGift = (g) => { store.set("bf_gift", g); renderCart(); listeners.forEach((fn) => fn(cart)); };
   const qtyHTML = (p, q) => '<div class="qty" aria-label="Cantidad de ' + esc(p.short) + '"><button type="button" data-q="' + p.id + '" data-d="-1" aria-label="Quitar uno">−</button><span>' + q + '</span><button type="button" data-q="' + p.id + '" data-d="1" aria-label="Agregar uno">+</button></div>';
-  const footHTML = (p) => (cart[p.id] ? qtyHTML(p, cart[p.id]) : '<button class="add" data-add="' + p.id + '" aria-label="Agregar ' + esc(p.short) + ' a la bolsa">' + ICON.plus + "</button>");
+  const footHTML = (p) => (cart[p.id] ? qtyHTML(p, cart[p.id]) : '<button class="add add--wide" data-add="' + p.id + '" aria-label="Agregar ' + esc(p.short) + ' al carrito">Agregar al carrito</button>');
   function refreshFoots() { $$("[data-foot]").forEach((el) => { const p = P(el.dataset.foot); if (p) el.innerHTML = footHTML(p); }); }
   function productCard(p) {
-    return '<article class="pcard"><a class="pcard__img" href="' + url.product(p.id) + '" tabindex="-1" aria-hidden="true"><img src="' + esc(p.img) + '" width="720" height="720" alt="" loading="lazy">' + (p.off ? '<span class="pcard__badge">-' + p.off + "%</span>" : p.isNew ? '<span class="pcard__badge pcard__badge--new">Nuevo</span>' : "") + "</a>" +
-      '<div class="pcard__body"><span class="pcard__brand">' + esc(p.brand) + '</span><h3 class="pcard__name"><a href="' + url.product(p.id) + '">' + esc(p.short) + "</a></h3>" +
-      '<p class="pcard__meta">' + esc(p.size) + (p.flavor && p.flavor !== "Sin sabor" ? " · " + esc(p.flavor) : "") + "</p>" +
-      '<div class="pcard__foot"><div class="price"><b>' + money(p.price) + "</b>" + (p.before ? "<s>" + money(p.before) + "</s>" : "") + (p.perServing ? "<small>" + money(p.perServing) + " / servicio</small>" : "") + '</div><div data-foot="' + p.id + '">' + footHTML(p) + "</div></div></div></article>";
+    return '<article class="pcard"><a class="pcard__img" href="' + url.product(p.id) + '" tabindex="-1" aria-hidden="true"><img src="' + esc(p.img) + '" width="720" height="720" alt="" loading="lazy">' + (p.off ? '<span class="pcard__badge">-' + p.off + "%</span>" : p.isNew ? '<span class="pcard__badge pcard__badge--new">Nuevo</span>' : "") + '<span class="pcard__quick">Ver producto</span></a>' +
+      '<div class="pcard__body"><span class="pcard__brand">' + esc(catName(p.cat) || p.brand) + '</span><h3 class="pcard__name"><a href="' + url.product(p.id) + '">' + esc(p.short) + "</a></h3>" +
+      '<p class="pcard__meta">' + esc(p.brand) + " · " + esc(p.size) + (p.flavor && p.flavor !== "Sin sabor" ? " · " + esc(p.flavor) : "") + "</p>" +
+      '<div class="price"><b>' + money(p.price) + "</b>" + (p.before ? "<s>" + money(p.before) + "</s><em>" + p.off + "% OFF</em>" : "") + (p.perServing ? "<small>" + money(p.perServing) + " / servicio</small>" : "") + "</div>" +
+      '<div class="pcard__foot" data-foot="' + p.id + '">' + footHTML(p) + "</div></div></article>";
   }
   function renderCart() {
     const lines = cartLines(), count = cartCount();
@@ -132,7 +161,7 @@
     const body = $("#cartBody"), foot = $("#cartFoot"); if (!body) return;
     if (!lines.length) {
       const top = Object.values(CAT).filter((p) => p.star).slice(0, 3);
-      body.innerHTML = '<div class="drawer__empty"><p>Tu bolsa está vacía.</p><a class="btn" href="tienda.html">Ir a la tienda <span class="arrow">→</span></a></div><div class="drawer__sugg"><h3>Los más buscados</h3>' + top.map(lineSugg).join("") + "</div>";
+      body.innerHTML = '<div class="drawer__empty"><p>Tu carrito está vacío.</p><a class="btn" href="tienda.html">Ir a la tienda <span class="arrow">→</span></a></div><div class="drawer__sugg"><h3>Los más buscados</h3>' + top.map(lineSugg).join("") + "</div>";
       foot.innerHTML = ""; return;
     }
     const sugg = complements(lines.map((l) => l.id)).slice(0, 2);
@@ -171,7 +200,7 @@
   function updateMbar() {
     const mb = $("#mbar"); if (!mb) return;
     const n = cartCount(), mc = $("#mbarCart");
-    mc.hidden = !n; mc.textContent = n ? "Bolsa · " + n + " · " + money(cartTotal()) : "";
+    mc.hidden = !n; mc.textContent = n ? "Carrito · " + n + " · " + money(cartTotal()) : "";
     const chatOpen = !$("#chat").hidden, cartOpen = !$("#cart").hidden;
     mb.classList.toggle("hide", hideMbarFor.size > 0 || chatOpen || cartOpen);
     $("#chatfab").classList.toggle("hide", hideMbarFor.has("footer") || chatOpen);
@@ -246,9 +275,9 @@
     const safeWa = (u) => typeof u === "string" && u.startsWith("https://wa.me/");
     function cartCardHTML(c) {
       const ids = Object.keys(c || {}).filter((id) => P(id));
-      if (!ids.length) return '<h4>Tu bolsa</h4><p style="margin:0">Vacía</p>';
+      if (!ids.length) return '<h4>Tu carrito</h4><p style="margin:0">Vacía</p>';
       let t = 0; const li = ids.map((id) => { const s = P(id).price * c[id]; t += s; return "<li><span>" + c[id] + "× " + esc(P(id).short) + "</span><span>" + money(s) + "</span></li>"; }).join("");
-      return "<h4>Tu bolsa</h4><ul>" + li + '</ul><div class="ctot"><span>Total</span><span>' + money(t) + '</span></div><button class="btn btn--ghost btn--sm" data-open-cart>Ver bolsa</button>';
+      return "<h4>Tu carrito</h4><ul>" + li + '</ul><div class="ctot"><span>Total</span><span>' + money(t) + '</span></div><button class="btn btn--ghost btn--sm" data-open-cart>Ver carrito</button>';
     }
     function addCard(cls, html) { const d = document.createElement("div"); d.className = "ccard " + cls; d.innerHTML = html; log.appendChild(d); log.scrollTop = log.scrollHeight; return d; }
     function chips(opts) { $("#chatChips").innerHTML = (opts || []).slice(0, 4).map((o) => '<button type="button">' + esc(o) + "</button>").join(""); }

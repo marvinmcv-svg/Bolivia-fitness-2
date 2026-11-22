@@ -35,7 +35,7 @@
     (p.perServing ? '<p class="muted" style="margin:-10px 0 0">' + money(p.perServing) + " por servicio · " + esc(servings) + "</p>" : "") +
     '<p class="pdp__desc">' + esc(p.desc) + "</p>" +
     (sibs.length > 1 ? '<div><p style="margin:0 0 10px;font-weight:600">Presentación <span class="muted">· ¿cuál es la ideal para vos?</span></p><div class="otiles">' + sibs.map((s) => '<a class="otile" href="' + X.url.product(s.id) + '"' + (s.id === p.id ? ' aria-current="true"' : "") + ">" + esc(s.size) + "<small>" + esc(s.flavor || "") + " · " + money(s.price) + (s.perServing ? " · " + money(s.perServing) + "/serv." : "") + "</small></a>").join("") + "</div></div>" : "") +
-    '<div class="buybox"><div class="buybox__row"><div class="qty" aria-label="Cantidad"><button type="button" id="qMinus" aria-label="Menos">−</button><span id="qVal">1</span><button type="button" id="qPlus" aria-label="Más">+</button></div><button class="btn btn--lg" id="addBtn">Agregar a la bolsa</button></div>' +
+    '<div class="buybox"><div class="buybox__row"><div class="qty" aria-label="Cantidad"><button type="button" id="qMinus" aria-label="Menos">−</button><span id="qVal">1</span><button type="button" id="qPlus" aria-label="Más">+</button></div><button class="btn btn--lg" id="addBtn">Agregar al carrito</button></div>' +
     '<button class="btn btn--light btn--lg btn--block" id="buyNow">Comprar ahora <span class="arrow">→</span></button>' +
     (bf ? '<p class="muted" style="margin:0;font-size:13px">🎁 ' + esc(B.campaign.gift) + ". Precio Black Friday hasta el 30 de noviembre.</p>" : "") + "</div>" +
     '<div class="perks"><div class="perk">' + I.truck + "Envío gratis a domicilio</div><div class=\"perk\">" + I.shield + "Original · registro SENASAG</div><div class=\"perk\">" + I.store + "Retiro en 7 ciudades</div></div>" +
@@ -60,7 +60,7 @@
   $("#qMinus").addEventListener("click", () => setQ(qty - 1)); $("#qPlus").addEventListener("click", () => setQ(qty + 1));
   $("#addBtn").addEventListener("click", () => { X.cart.add(p.id, qty); X.openCart(); });
   $("#buyNow").addEventListener("click", () => { X.cart.add(p.id, qty, true); location.href = "pedido.html"; });
-  $("#stickybuy").innerHTML = '<div class="price"><b>' + money(p.price) + "</b>" + (p.before ? "<s>" + money(p.before) + "</s>" : "") + '</div><button class="btn" data-add="' + p.id + '">Agregar a la bolsa</button>';
+  $("#stickybuy").innerHTML = '<div class="price"><b>' + money(p.price) + "</b>" + (p.before ? "<s>" + money(p.before) + "</s>" : "") + '</div><button class="btn" data-add="' + p.id + '">Agregar al carrito</button>';
   document.body.classList.add("has-stickybuy");
 
   // Combinalo (precio = suma exacta)
@@ -69,9 +69,9 @@
     $("#combo").innerHTML = '<div class="combo"><div class="combo__items">' + combo.map((c, i) => (i ? '<span class="combo__plus">+</span>' : "") + '<div class="combo__item"><a href="' + X.url.product(c.id) + '"><img src="' + esc(c.img) + '" width="170" height="170" alt="" loading="lazy"></a><label><input type="checkbox" checked data-combo="' + c.id + '"' + (i === 0 ? " disabled" : "") + "><span>" + (i === 0 ? "Este producto: " : "") + esc(c.short) + "<br><b>" + money(c.price) + "</b></span></label></div>").join("") + "</div>" +
       '<div class="combo__sum"><span class="muted">Total seleccionado</span><b id="comboTot"></b><span class="muted" id="comboSave" style="font-size:13px"></span><button class="btn btn--lg" id="comboAdd">Agregar seleccionados</button><span class="muted" style="font-size:12px">Precio = suma de los productos.</span></div></div>';
     const sel = () => $$("[data-combo]").filter((c) => c.checked).map((c) => P(c.dataset.combo));
-    const upd = () => { const s = sel(); $("#comboTot").textContent = money(s.reduce((a, c) => a + c.price, 0)); const sv = s.reduce((a, c) => a + (c.save || 0), 0); $("#comboSave").textContent = sv ? "Ahorrás " + money(sv) + " vs. precio antes" : ""; $("#comboAdd").textContent = s.length > 1 ? "Agregar los " + s.length : "Agregar a la bolsa"; };
+    const upd = () => { const s = sel(); $("#comboTot").textContent = money(s.reduce((a, c) => a + c.price, 0)); const sv = s.reduce((a, c) => a + (c.save || 0), 0); $("#comboSave").textContent = sv ? "Ahorrás " + money(sv) + " vs. precio antes" : ""; $("#comboAdd").textContent = s.length > 1 ? "Agregar los " + s.length : "Agregar al carrito"; };
     $("#combo").addEventListener("change", upd); upd();
-    $("#comboAdd").addEventListener("click", () => { sel().forEach((c) => X.cart.add(c.id, 1, true)); X.toast("<b>" + sel().length + " productos</b> agregados a tu bolsa"); X.openCart(); });
+    $("#comboAdd").addEventListener("click", () => { sel().forEach((c) => X.cart.add(c.id, 1, true)); X.toast("<b>" + sel().length + " productos</b> agregados al carrito"); X.openCart(); });
   } else $("#combo").closest("section").hidden = true;
 
   // Recomendados: misma categoría, luego mayores descuentos
