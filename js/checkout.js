@@ -2,7 +2,7 @@
 (function () {
   "use strict";
   const X = window.BFX, B = X.B, $ = X.$, esc = X.esc, money = X.money, P = X.P;
-  const F = Object.assign({ step: 1, mode: "", branch: "", name: "", address: "", reference: "", when: "asap", time: "", note: "", topic: "", question: "" }, X.store.get("bf_funnel", {}, true));
+  const F = Object.assign({ step: 1, mode: "", branch: "", name: "", phone: "", consent: false, address: "", reference: "", when: "asap", time: "", note: "", topic: "", question: "" }, X.store.get("bf_funnel", {}, true));
   if (X.cart.count() && F.step === 1 && !F.mode) F.step = 1;
   const STEPS = ["Tu carrito", "Entrega", "Tus datos", "Enviar"];
   const fmsg = (t) => { $("#fmsg").textContent = t || ""; };
@@ -19,7 +19,7 @@
     const f = $("#fform"), lines = X.cart.lines();
     if (F.step === 1) {
       const sugg = X.complements(lines.map((l) => l.id)).slice(0, 3);
-      f.innerHTML = "<h2>Tu carrito</h2>" + (lines.length ? lines.map((l) => { const p = P(l.id); return '<div class="bag__row"><a href="' + X.url.product(p.id) + '"><img src="' + esc(p.img) + '" width="72" height="72" alt=""></a><div><b>' + esc(p.short) + "</b><small>" + esc(p.size) + " · " + money(p.price) + (p.before ? " · antes " + money(p.before) : "") + "</small></div>" + X.qtyHTML(p, l.qty) + "</div>"; }).join("") + '<div class="bag__tot"><span>Total</span><span>' + money(X.cart.total()) + "</span></div>" : '<p class="muted">Tu carrito está vacío.</p><a class="btn" href="tienda.html">Ir a la tienda <span class="arrow">→</span></a>') +
+      f.innerHTML = "<h2>Tu carrito</h2>" + (lines.length ? lines.map((l) => { const p = P(l.id); return '<div class="bag__row"><a href="' + X.url.product(p.id) + '" tabindex="-1" aria-hidden="true"><img src="' + esc(p.img) + '" width="72" height="72" alt=""></a><div><b>' + esc(p.short) + "</b><small>" + esc(p.size) + " · " + money(p.price) + (p.before ? " · antes " + money(p.before) : "") + "</small></div>" + X.qtyHTML(p, l.qty) + "</div>"; }).join("") + '<div class="bag__tot"><span>Total</span><span>' + money(X.cart.total()) + "</span></div>" : '<p class="muted">Tu carrito está vacío.</p><a class="btn" href="tienda.html">Ir a la tienda <span class="arrow">→</span></a>') +
         (sugg.length ? '<p style="margin:22px 0 4px;font-weight:600">Combinalo con</p><div class="picker">' + sugg.map((p) => '<button type="button" data-add="' + p.id + '"><img src="' + esc(p.img) + '" width="40" height="40" alt=""><span>' + esc(p.short) + "<br><b>+ " + money(p.price) + "</b></span></button>").join("") + "</div>" : "") +
         (B.campaignActive() && lines.length ? '<div class="field"><label for="f-gift">🎁 Accesorio de regalo (1 por compra)</label><select id="f-gift" data-gift-sel><option value="">El que esté disponible</option>' + B.campaign.gifts.map((g) => "<option" + (g === X.cart.getGift() ? " selected" : "") + ">" + esc(g) + "</option>").join("") + "</select></div>" : "") +
         nav(0, lines.length ? 2 : 0) + (lines.length ? "" : '<p style="margin-top:18px"><button class="link" type="button" data-mode-q>¿Solo querés hacer una consulta?</button></p>');
@@ -30,6 +30,8 @@
     } else if (F.step === 3) {
       const st = (b) => { const s = X.branchStatus(b); return s.k === "unknown" ? "" : " · " + (s.k === "closed" ? "Cerrado ahora" : "Abierto"); };
       f.innerHTML = '<h2>Tus datos</h2><div class="field"><label for="f-name">Nombre</label><input id="f-name" data-f="name" autocomplete="name" value="' + esc(F.name) + '"></div>' +
+        '<div class="field"><label for="f-phone">WhatsApp (para seguimiento)</label><input id="f-phone" data-f="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="Ej. 70012345" value="' + esc(F.phone) + '"></div>' +
+        '<label class="consent"><input type="checkbox" data-consent' + (F.consent ? " checked" : "") + '><span>Quiero recibir recordatorios de recompra y promos por WhatsApp (podés darte de baja cuando quieras).</span></label>' +
         '<div class="field"><label for="f-branch">' + (F.mode === "national" ? "Ciudad de destino" : "Ciudad / sucursal") + '</label><select id="f-branch" data-f="branch"><option value="">Elegí</option>' + B.branches.map((b) => '<option value="' + b.id + '"' + (F.branch === b.id ? " selected" : "") + ">" + esc(b.name) + st(b) + "</option>").join("") + '<option value="cc"' + (F.branch === "cc" ? " selected" : "") + ">Otra ciudad · WhatsApp nacional</option></select></div>" +
         (F.mode === "delivery" || F.mode === "national" ? '<div class="row2"><div class="field"><label for="f-addr">Dirección</label><input id="f-addr" data-f="address" autocomplete="street-address" value="' + esc(F.address) + '"></div><div class="field"><label for="f-ref">Referencia</label><input id="f-ref" data-f="reference" value="' + esc(F.reference) + '"></div></div>' : "") +
         (F.mode !== "question" ? '<div class="field"><label>¿Cuándo?</label><div class="otiles"><button type="button" class="otile" aria-pressed="' + (F.when !== "later") + '" data-when="asap">Lo antes posible</button><button type="button" class="otile" aria-pressed="' + (F.when === "later") + '" data-when="later">Programar hora</button></div>' + (F.when === "later" ? '<input type="time" data-f="time" value="' + esc(F.time) + '" aria-label="Hora" style="margin-top:10px;max-width:180px">' : "") + "</div>" : "") +
@@ -60,9 +62,16 @@
     if (e.target.id === "sendWa") {
       const o = order();
       if (o.lines.length) { const h = X.store.get("leonia_orders", []), c = {}; o.lines.forEach((l) => (c[l.id] = l.qty)); h.unshift({ id: "WEB-" + Date.now().toString(36).toUpperCase().slice(-5), at: new Date().toISOString(), branch: o.branch, service: o.mode, cart: c }); X.store.set("leonia_orders", h.slice(0, 3)); }
+      if (o.lines.length && o.mode !== "question") sendToCrm(o);
       fmsg("¡Listo! Se abrió WhatsApp con tu pedido. 🦁");
     }
   });
+  // el pedido también queda en el CRM de la tienda (seguimiento, recordatorios de recompra)
+  function sendToCrm(o) {
+    const body = JSON.stringify({ name: F.name, phone: F.phone, consent: !!F.consent, branch: o.branch, mode: o.mode, address: o.address, reference: o.reference, gift: o.gift, note: o.note, lines: o.lines, website: "" });
+    try { fetch("/api/crm?op=intake", { method: "POST", headers: { "Content-Type": "application/json" }, body, keepalive: true }).catch(() => {}); } catch (e) { /* sin red: igual sale el WhatsApp */ }
+  }
+  $("#fform").addEventListener("change", (e) => { if (e.target.matches("[data-consent]")) { F.consent = e.target.checked; preview(); } });
   $("#fform").addEventListener("input", (e) => { const k = e.target.dataset.f; if (k) { F[k] = e.target.value; preview(); } if (e.target.matches("[data-gift-sel]")) { X.cart.setGift(e.target.value); preview(); } });
   X.cart.onChange(() => { if (F.step === 1) render(); else preview(); });
   X.hideMbarWhileVisible($(".co"), "checkout");

@@ -73,6 +73,7 @@ function liveContext(ctx, channel) {
     "Ya sugeriste algo: " + (st.upsold ? "sí (no sugieras más)" : "no") + ". Novedades ya mostradas: " + (st.newsShown ? "sí" : "no") + ".",
   ];
   if (ctx.autoPlaced) lines.push("PEDIDO YA ENVIADO por el sistema (" + ctx.autoPlaced.id + "): el cliente confirmó. Decile en una frase que toque el botón verde para mandarlo por WhatsApp. No vuelvas a resumir ni a confirmar.");
+  if (ctx.lang === "en") lines.push("IDIOMA: el cliente está usando el sitio en INGLÉS. Respondé SIEMPRE en inglés natural (precios en Bs, nombres de productos y sucursales tal cual). Los botones de opciones, también en inglés.");
   return lines.join("\n");
 }
 

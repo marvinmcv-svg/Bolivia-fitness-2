@@ -1,6 +1,22 @@
 {
   "cleanUrls": true,
   "functions": {
-    "api/leonia.js": { "maxDuration": 120 }
-  }
+    "api/leonia.js": { "maxDuration": 120 },
+    "api/crm.js": { "maxDuration": 30 }
+  },
+  "headers": [
+    {
+      "source": "/crm",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Referrer-Policy", "value": "same-origin" },
+        { "key": "Cache-Control", "value": "no-store" }
+      ]
+    },
+    {
+      "source": "/js/crm.js",
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }]
+    }
+  ]
 }

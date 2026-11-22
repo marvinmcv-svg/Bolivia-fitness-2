@@ -170,6 +170,7 @@ async function handler(req, res, opts) {
   if (!history.length || history[history.length - 1].role !== "user") return json(res, 400, { error: "bad_request" });
   const channel = body.channel === "voice" ? "voice" : "text";
   const ctx = createSession(body.state, (opts && opts.now) || new Date());
+  ctx.lang = body.lang === "en" ? "en" : "es";
 
   res.statusCode = 200;
   res.setHeader("Content-Type", "application/x-ndjson; charset=utf-8");
@@ -206,6 +207,11 @@ async function handler(req, res, opts) {
     else send({ type: "error", kind: err && err.status === 429 ? "rate_limited" : "upstream" });
   }
   flush();
+  // pedido confirmado en este turno → queda registrado en el CRM (máx. 2,5 s; si falla, el cliente igual tiene su WhatsApp)
+  if (ctx.state.placed && (ctx.autoPlaced || ctx.used.has("place_order")) && !(opts && opts.noCrm)) {
+    try { await Promise.race([require("./crm").recordFromLeonia(ctx.state, ctx.now), new Promise((r) => setTimeout(r, 2500))]); }
+    catch (e) { console.log(JSON.stringify({ evt: "crm_leonia_error", msg: String(e && e.message).slice(0, 200) })); }
+  }
   if (!sentOptions && tw.text.trim()) { const o = fallbackOptions(ctx); if (o) send({ type: "options", options: o }); }
   send({ type: "state", state: ctx.state });
   res.end();

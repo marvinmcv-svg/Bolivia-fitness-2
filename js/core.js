@@ -10,6 +10,8 @@
   const money = B.money;
   const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const PAGE = document.body.dataset.page || "home";
+  const LANG = () => (window.BFPrefs ? window.BFPrefs.lang : "es");
+  const T = (str) => (window.BFT ? window.BFT.t(str) : str);
   let CAT = B.catalog();
   const P = (id) => CAT[id];
   const catName = (id) => (B.categories.find((c) => c.id === id) || {}).name || "";
@@ -64,6 +66,23 @@
     m.push('¿Dudas? LeonIA te responde 24/7 · <a href="#" data-open-chat>Preguntar</a>');
     return m;
   }
+  // botones de idioma y modo noche (js/prefs.js guarda la elección)
+  const prefButtons = () =>
+    '<button type="button" class="prefbtn" data-lang-toggle data-noi18n aria-label="' + (LANG() === "en" ? "Cambiar a español" : "Switch to English") + '" title="' + (LANG() === "en" ? "Español" : "English") + '">' + (LANG() === "en" ? "ES" : "EN") + "</button>" +
+    '<button type="button" class="prefbtn" data-theme-toggle aria-label="Modo noche" aria-pressed="' + (!!window.BFPrefs && window.BFPrefs.theme === "dark") + '"><svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg><svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"/></svg></button>';
+  function wirePrefs() {
+    document.addEventListener("click", (e) => {
+      if (e.target.closest("[data-theme-toggle]")) { if (window.BFPrefs) window.BFPrefs.toggleTheme(); return; }
+      if (e.target.closest("[data-lang-toggle]")) { if (window.BFPrefs) window.BFPrefs.toggleLang(); }
+    });
+    const sync = () => {
+      const en = LANG() === "en", dark = !!window.BFPrefs && window.BFPrefs.theme === "dark";
+      document.querySelectorAll("[data-lang-toggle]").forEach((b) => { b.textContent = en ? "ES" : "EN"; b.setAttribute("aria-label", en ? "Cambiar a español" : "Switch to English"); b.title = en ? "Español" : "English"; });
+      document.querySelectorAll("[data-theme-toggle]").forEach((b) => { b.setAttribute("aria-pressed", String(dark)); b.setAttribute("aria-label", dark ? "Modo claro" : "Modo noche"); });
+    };
+    if (window.BFPrefs) window.BFPrefs.onChange(sync);
+    sync();
+  }
   function injectLayout() {
     const head = document.createElement("div");
     const msgs = topMessages();
@@ -78,7 +97,7 @@
       '<a class="gnav__logo" href="index.html" aria-label="Bolivia Fitness, inicio"><img src="assets/img/logo.png" width="44" height="44" alt=""><span>Bolivia<b>Fitness</b></span></a>' +
       '<ul class="gnav__links">' + NAV.map(([h, t, k]) => '<li><a href="' + h + '"' + (k === NAV_KEY ? ' aria-current="page"' : "") + ">" + t + "</a></li>").join("") + '<li><a href="#" class="ai" data-open-chat>LeonIA</a></li></ul>' +
       '<form class="gsearch" action="tienda.html" role="search"><label class="vh" for="gq">Buscar productos</label>' + ICON.search + '<input id="gq" name="q" type="search" placeholder="Buscar…" autocomplete="off"></form>' +
-      '<div class="gnav__icons"><a class="iconbtn gnav__find" href="tienda.html#buscar" aria-label="Buscar productos">' + ICON.search + '</a><button class="cartbtn" data-open-cart aria-label="Abrir carrito">' + ICON.cart + '<span class="cartbtn__count" data-cart-count hidden>0</span></button></div></nav></header>' +
+      '<div class="gnav__icons"><a class="iconbtn gnav__find" href="tienda.html#buscar" aria-label="Buscar productos">' + ICON.search + '</a>' + prefButtons() + '<button class="cartbtn" data-open-cart aria-label="Abrir carrito">' + ICON.cart + '<span class="cartbtn__count" data-cart-count hidden>0</span></button></div></nav></header>' +
       '<div class="navpanel" id="navpanel" hidden><nav aria-label="Menú móvil">' + NAV.map(([h, t]) => '<a href="' + h + '">' + t + "</a>").join("") + '<a href="nosotros.html">Nosotros</a><a href="pedido.html">Mi pedido</a><a href="#" class="ai" data-open-chat>LeonIA</a></nav></div>';
     document.body.prepend(...head.childNodes);
     // alto real de la cinta de campaña → el hero 3D descuenta ese espacio y sus botones no quedan bajo el pliegue
@@ -102,7 +121,7 @@
       '<div><h3>Comprar</h3><ul><li><a href="ofertas.html">Ofertas</a></li><li><a href="pedido.html">Mi pedido</a></li><li><a href="#" data-open-chat>Comprar con LeonIA</a></li><li><a href="' + B.waLink(B.config.callCenter, "¡Hola Bolivia Fitness! 🦁") + '" target="_blank" rel="noopener">WhatsApp 756 66702</a></li></ul></div>' +
       '<div><h3>Sucursales</h3><ul>' + B.branches.map((b) => '<li><a href="sucursales.html">' + esc(b.name) + "</a></li>").join("") + "</ul></div>" +
       '<div><h3>Bolivia Fitness</h3><ul><li><a href="nosotros.html">Nosotros</a></li><li><a href="nosotros.html#comunidad">Comunidad</a></li><li><a href="' + B.config.instagram + '" target="_blank" rel="noopener">Instagram</a></li><li><a href="' + B.config.facebook + '" target="_blank" rel="noopener">Facebook</a></li><li><a href="' + B.config.tiktok + '" target="_blank" rel="noopener">TikTok</a></li></ul></div></div>' +
-      '<div class="ftr__bottom"><span>© ' + new Date().getFullYear() + " Bolivia Fitness · " + (B.campaignActive() ? "Precios Black Friday válidos del 16 al 30 de noviembre de 2026. " : "") + 'Stock, pago y envío se confirman por WhatsApp.</span><span>Fotos y videos: @boliviafitness</span></div></div></footer>' +
+      '<div class="ftr__bottom"><span>© ' + new Date().getFullYear() + " Bolivia Fitness · " + (B.campaignActive() ? "Precios Black Friday válidos del 16 al 30 de noviembre de 2026. " : "") + 'Stock, pago y envío se confirman por WhatsApp.</span><span>Fotos y videos: @boliviafitness · <a href="crm" rel="nofollow">Acceso equipo</a></span></div></div></footer>' +
       '<div class="drawer" id="cart" role="dialog" aria-modal="true" aria-labelledby="cartTtl" hidden><div class="scrim" data-close-cart></div><aside class="drawer__panel"><div class="drawer__head"><h2 id="cartTtl">Tu carrito</h2><button class="xbtn" data-close-cart aria-label="Cerrar carrito">✕</button></div><div class="drawer__body" id="cartBody"></div><div class="drawer__foot" id="cartFoot"></div></aside></div>' +
       '<button class="chatfab" id="chatfab" data-open-chat aria-label="Abrir LeonIA, tu coach y asistente"><img src="assets/img/logo.png" width="34" height="34" alt=""><span><b>LeonIA Coach</b><small>Armemos tu plan</small></span></button>' +
       '<div class="chat" id="chat" role="dialog" aria-modal="false" aria-labelledby="chatTtl" hidden><div class="chat__head"><div class="chat__avatar" id="chatAvatar" aria-hidden="true"><img src="assets/img/logo.png" width="52" height="52" alt=""></div><div><b id="chatTtl">LeonIA</b><small><i class="dot dot--live"></i> <span id="chatSub">Coach y recepción · 24/7</span></small></div><button class="xbtn" id="chatClose" aria-label="Cerrar asistente">✕</button></div>' +
@@ -165,12 +184,12 @@
       foot.innerHTML = ""; return;
     }
     const sugg = complements(lines.map((l) => l.id)).slice(0, 2);
-    body.innerHTML = lines.map((l) => { const p = P(l.id); return '<div class="line"><a href="' + url.product(p.id) + '"><img src="' + esc(p.img) + '" width="64" height="64" alt=""></a><div><b>' + esc(p.short) + "</b><small>" + esc(p.size) + " · " + money(p.price) + "</small></div>" + qtyHTML(p, l.qty) + "</div>"; }).join("") +
+    body.innerHTML = lines.map((l) => { const p = P(l.id); return '<div class="line"><a href="' + url.product(p.id) + '" tabindex="-1" aria-hidden="true"><img src="' + esc(p.img) + '" width="64" height="64" alt=""></a><div><b>' + esc(p.short) + "</b><small>" + esc(p.size) + " · " + money(p.price) + "</small></div>" + qtyHTML(p, l.qty) + "</div>"; }).join("") +
       (B.campaignActive() ? '<p class="giftline">🎁 ' + esc(B.campaign.gift) + (getGift() ? ". Elegiste: <b>" + esc(getGift()) + "</b>" : ". Elegilo al finalizar.") + "</p>" : "") +
       (sugg.length ? '<div class="drawer__sugg"><h3>Combinalo con</h3>' + sugg.map(lineSugg).join("") + "</div>" : "");
     foot.innerHTML = '<div class="tot"><span>Total</span><b>' + money(cartTotal()) + '</b></div><a class="btn btn--lg btn--block" href="pedido.html">Finalizar pedido <span class="arrow">→</span></a>';
   }
-  const lineSugg = (p) => '<div class="line"><a href="' + url.product(p.id) + '"><img src="' + esc(p.img) + '" width="64" height="64" alt=""></a><div><b>' + esc(p.short) + "</b><small>" + money(p.price) + '</small></div><button class="add" data-add="' + p.id + '" aria-label="Agregar ' + esc(p.short) + '">' + ICON.plus + "</button></div>";
+  const lineSugg = (p) => '<div class="line"><a href="' + url.product(p.id) + '" tabindex="-1" aria-hidden="true"><img src="' + esc(p.img) + '" width="64" height="64" alt=""></a><div><b>' + esc(p.short) + "</b><small>" + money(p.price) + '</small></div><button class="add" data-add="' + p.id + '" aria-label="Agregar ' + esc(p.short) + '">' + ICON.plus + "</button></div>";
 
   /* sugerencias deterministas por categoría (mismas reglas que el asistente) */
   const PAIR = { creatinas: ["dp-whey-phorm", "dp-glutamine"], proteinas: ["dp-creatine-30", "dp-glutamine"], preentrenos: ["dp-creatine-60", "dp-whey-phorm"], recuperacion: ["dp-creatine-30", "dp-iso-phorm"], ellas: ["dp-iso-phorm", "dp-creatine-lemon"], ganadores: ["ps-creatine-1200", "dp-glutamine"] };
@@ -187,7 +206,7 @@
     if (e.target.closest("[data-open-cart]")) { e.preventDefault(); openCart(); return; }
     if (e.target.closest("[data-close-cart]")) closeCart();
     const oc = e.target.closest("[data-open-chat]");
-    if (oc) { e.preventDefault(); closeNav(); openChat(oc.dataset.ask || ""); }
+    if (oc) { e.preventDefault(); closeNav(); openChat(T(oc.dataset.ask || "")); }
   });
   let lastFocus = null;
   function openCart() { lastFocus = document.activeElement; $("#cart").hidden = false; renderCart(); updateMbar(); setTimeout(() => $("#cart .xbtn").focus(), 30); }
@@ -299,9 +318,10 @@
     $("#chatClose").addEventListener("click", closeChat);
     $("#chatForm").addEventListener("submit", (e) => { e.preventDefault(); voice.lastWasVoice = false; const v = $("#chatInput").value.trim(); if (v) send(v); });
     function friendlyError(kind) {
-      const txt = { setup: "Estoy terminando de prepararme 🛠️ Muy pronto voy a poder ayudarte a comprar.", rate: "Muchas preguntas seguidas 😅 Esperá un minuto y seguimos.", net: "Se cortó la conexión. Probá de nuevo en un ratito." }[kind] || "Algo falló de mi lado.";
-      const d = addMsg("bot", txt + "\nMientras tanto podés ver la tienda o pedir directo por WhatsApp.");
-      d.insertAdjacentHTML("beforeend", '<div class="qchips" style="margin-top:8px"><a class="btn btn--sm" href="tienda.html">Ver tienda</a> <a class="btn btn--wa btn--sm" href="pedido.html">Pedir por WhatsApp</a></div>');
+      const en = LANG() === "en";
+      const txt = (en ? { setup: "I'm almost ready 🛠️ Very soon I'll be able to help you shop.", rate: "Lots of questions in a row 😅 Give me a minute and we'll continue.", net: "The connection dropped. Try again in a moment." } : { setup: "Estoy terminando de prepararme 🛠️ Muy pronto voy a poder ayudarte a comprar.", rate: "Muchas preguntas seguidas 😅 Esperá un minuto y seguimos.", net: "Se cortó la conexión. Probá de nuevo en un ratito." })[kind] || (en ? "Something went wrong on my side." : "Algo falló de mi lado.");
+      const d = addMsg("bot", txt + (en ? "\nMeanwhile you can browse the shop or order directly on WhatsApp." : "\nMientras tanto podés ver la tienda o pedir directo por WhatsApp."));
+      d.insertAdjacentHTML("beforeend", '<div class="qchips" style="margin-top:8px"><a class="btn btn--sm" href="tienda.html">' + (en ? "See shop" : "Ver tienda") + '</a> <a class="btn btn--wa btn--sm" href="pedido.html">' + (en ? "Order on WhatsApp" : "Pedir por WhatsApp") + "</a></div>");
     }
     async function send(text, opts) {
       if (busy || !text) return;
@@ -314,7 +334,7 @@
       LS.cart = Object.assign({}, cart); LS.myOrders = store.get("leonia_orders", []);
       let botText = "", bubble = typing, cartCard = null;
       try {
-        const res = await fetch("/api/leonia", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messages: LOG.slice(-16), state: LS, channel: (opts && opts.voice) ? "voice" : "text" }) });
+        const res = await fetch("/api/leonia", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messages: LOG.slice(-16), state: LS, channel: (opts && opts.voice) ? "voice" : "text", lang: LANG() }) });
         if (!res.ok || !res.body) {
           typing.remove(); LOG.pop();
           friendlyError([503, 404, 501, 405].includes(res.status) ? "setup" : res.status === 429 ? "rate" : "other");
@@ -382,11 +402,11 @@
       $("#voicebar").classList.toggle("live", s !== "idle");
       $("#voiceStatus").textContent = { idle: "Tocá el micrófono y hablá", listening: "Escuchando…", thinking: "Pensando…", speaking: "Hablando… tocá para interrumpir" }[s];
     }
-    function pickVoice() { const vs = speechSynthesis.getVoices(); voice.voiceObj = vs.find((v) => /es-BO/i.test(v.lang)) || vs.find((v) => /es-(419|US|MX|AR)/i.test(v.lang)) || vs.find((v) => /^es/i.test(v.lang)) || null; }
+    function pickVoice() { const vs = speechSynthesis.getVoices(); voice.voiceObj = LANG() === "en" ? (vs.find((v) => /^en-US/i.test(v.lang)) || vs.find((v) => /^en/i.test(v.lang)) || null) : vs.find((v) => /es-BO/i.test(v.lang)) || vs.find((v) => /es-(419|US|MX|AR)/i.test(v.lang)) || vs.find((v) => /^es/i.test(v.lang)) || null; }
     function speechText(t) { return t.replace(/\*\*/g, "").replace(/https?:\/\/\S+/g, "").replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}]/gu, "").replace(/Bs\.?\s?(\d[\d.,]*)/g, "$1 bolivianos").replace(/^\s*[-•]\s*/gm, "").replace(/\s+/g, " ").trim(); }
     function speak(t) {
       if (!voice.lastWasVoice || !("speechSynthesis" in window)) { setVoiceState("idle"); return; }
-      const u = new SpeechSynthesisUtterance(speechText(t)); u.lang = "es-BO"; if (voice.voiceObj) u.voice = voice.voiceObj; u.rate = 1.04;
+      const u = new SpeechSynthesisUtterance(speechText(t)); u.lang = LANG() === "en" ? "en-US" : "es-BO"; if (voice.voiceObj) u.voice = voice.voiceObj; u.rate = 1.04;
       u.onend = () => { voice.speaking = false; setVoiceState("idle"); if ($("#handsfree").checked && !chat.hidden) listen(); };
       voice.speaking = true; setVoiceState("speaking"); speechSynthesis.speak(u);
     }
@@ -395,7 +415,7 @@
     function listen() {
       if (!voice.ok || busy) return;
       stopSpeaking();
-      const r = new SR(); voice.rec = r; r.lang = "es-BO"; r.interimResults = true; r.maxAlternatives = 1;
+      const r = new SR(); voice.rec = r; r.lang = LANG() === "en" ? "en-US" : "es-BO"; r.interimResults = true; r.maxAlternatives = 1;
       let final = "";
       r.onresult = (e) => { let interim = ""; for (let i = e.resultIndex; i < e.results.length; i++) { const tr = e.results[i][0].transcript; if (e.results[i].isFinal) final += tr; else interim += tr; } $("#chatInput").value = (final + interim).trim(); };
       r.onerror = (e) => { voice.listening = false; setVoiceState("idle"); if (e.error === "not-allowed" || e.error === "service-not-allowed") addMsg("bot", "No tengo permiso para usar el micrófono. Podés escribirme igual 🙂"); };
@@ -413,7 +433,7 @@
   let openChat = () => {}, closeChat = () => {};
 
   /* ---------------- init ---------------- */
-  injectLayout();
+  injectLayout(); wirePrefs();
   const burger = $("#burger");
   burger.addEventListener("click", () => { const np = $("#navpanel"), open = np.hidden; np.hidden = !open; burger.setAttribute("aria-expanded", String(open)); document.body.style.overflow = open ? "hidden" : ""; });
   $("#navpanel").addEventListener("click", (e) => { if (e.target.closest("a")) closeNav(); });
