@@ -33,6 +33,11 @@ assets/             img, product, video, hero, brand
 se contradicen en un precio. Los precios Black Friday vuelven solos al precio "antes" cuando termina la
 campaña (`campaign.to`).
 
+## Deploy
+
+Vercel (proyecto `bolivia-fitness`) está conectado a este repo: cada push a la rama de producción
+(`claude/beautiful-ramanujan-quzhz4`) publica en https://bolivia-fitness.vercel.app; otras ramas generan previews.
+
 ## Correr localmente
 
 ```bash
